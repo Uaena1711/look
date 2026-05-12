@@ -100,6 +100,7 @@ enum AppConstants {
         static let defaultSearchLimit = 40
         static let searchDebounceNanoseconds: UInt64 = 70_000_000
         static let windowCornerRadius: CGFloat = 16
+        static let spotlightTopOffsetRatio: CGFloat = 0.22
         static let commandListMaxHeight: CGFloat = 180
         static let commandResultFontSize: CGFloat = 18
         static let calcMaxMagnitude = 1_000_000_000_000.0

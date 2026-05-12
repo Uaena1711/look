@@ -94,6 +94,21 @@ extension LauncherView {
         return windows.first
     }
 
+    func repositionOnFocusedDisplay(_ window: NSWindow) {
+        let cursor = NSEvent.mouseLocation
+        let target = NSScreen.screens.first(where: { $0.frame.contains(cursor) })
+            ?? NSScreen.main
+            ?? NSScreen.screens.first
+        guard let screen = target else { return }
+
+        let visible = screen.visibleFrame
+        let size = window.frame.size
+        let x = visible.midX - size.width / 2
+        let topOffset = visible.height * AppConstants.Launcher.spotlightTopOffsetRatio
+        let y = visible.maxY - topOffset - size.height
+        window.setFrameOrigin(NSPoint(x: x, y: y))
+    }
+
     func findEditableTextField(in view: NSView?) -> NSView? {
         guard let view else { return nil }
 
@@ -133,6 +148,7 @@ extension LauncherView {
         NSApplication.shared.activate(ignoringOtherApps: true)
 
         if let window = launcherWindow() {
+            repositionOnFocusedDisplay(window)
             window.makeKeyAndOrderFront(nil)
             activateLauncherModeAndFocus()
             let frameStr = NSStringFromRect(window.frame)
@@ -143,7 +159,10 @@ extension LauncherView {
         openWindow(id: "main")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             NSApplication.shared.activate(ignoringOtherApps: true)
-            launcherWindow()?.makeKeyAndOrderFront(nil)
+            if let window = launcherWindow() {
+                repositionOnFocusedDisplay(window)
+                window.makeKeyAndOrderFront(nil)
+            }
             activateLauncherModeAndFocus()
         }
     }
