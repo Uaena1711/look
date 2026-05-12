@@ -95,18 +95,26 @@ extension LauncherView {
     }
 
     func repositionOnFocusedDisplay(_ window: NSWindow) {
-        let cursor = NSEvent.mouseLocation
-        let target = NSScreen.screens.first(where: { $0.frame.contains(cursor) })
-            ?? NSScreen.main
-            ?? NSScreen.screens.first
-        guard let screen = target else { return }
+        guard let screen = focusedScreen() else { return }
 
         let visible = screen.visibleFrame
-        let size = window.frame.size
-        let x = visible.midX - size.width / 2
-        let topOffset = visible.height * AppConstants.Launcher.spotlightTopOffsetRatio
-        let y = visible.maxY - topOffset - size.height
-        window.setFrameOrigin(NSPoint(x: x, y: y))
+        let topInset = visible.height * AppConstants.Launcher.spotlightTopOffsetRatio
+        let origin = NSPoint(
+            x: visible.midX - window.frame.width / 2,
+            y: visible.maxY - topInset - window.frame.height
+        )
+        window.setFrameOrigin(origin)
+    }
+
+    func focusedScreen() -> NSScreen? {
+        let cursor = NSEvent.mouseLocation
+        if let underCursor = NSScreen.screens.first(where: { $0.frame.contains(cursor) }) {
+            return underCursor
+        }
+
+        // Fallbacks if the cursor is on a screen that's been disconnected.
+        if let main = NSScreen.main { return main }
+        return NSScreen.screens.first
     }
 
     func findEditableTextField(in view: NSView?) -> NSView? {
